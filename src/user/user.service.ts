@@ -1,10 +1,16 @@
+import { RegisterDto } from 'src/auth/dto/registerUser.dto';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from './schema/user.schema';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class UserService {
-  registerUser(data: any) {
-    return {
-      data,
-    };
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+  ) {}
+
+  async createUser(data: RegisterDto): Promise<User> {
+    return await this.userModel.create(data);
   }
 }
