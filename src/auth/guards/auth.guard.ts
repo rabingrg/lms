@@ -37,13 +37,13 @@ export class AuthGuard implements CanActivate {
       if (!decode.sub) {
         throw new UnauthorizedException('Invalid token payload!');
       }
-      const user = await this.userService.getUserById(decode.sub);
+      const { user } = await this.userService.getUserById(decode.sub);
 
       if (!user) {
         throw new NotFoundException('User not found!');
       }
 
-      request.user = user.user;
+      request.user = user;
 
       return true;
     } catch (error) {

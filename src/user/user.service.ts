@@ -80,7 +80,7 @@ export class UserService {
       .findOne({
         email: normalizedEmail,
       })
-      .select('email password role'); // return selective fields
+      .select('email +password role'); // return selective fields, "+" to return "select: false" added field in schema
 
     if (!existingUser) {
       throw new HttpException(

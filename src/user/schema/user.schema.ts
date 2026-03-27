@@ -15,7 +15,7 @@ export class User {
   @Prop({ required: true, unique: true, trim: true, lowercase: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, select: false }) // "select: false" -> exclude it on response
   password: string;
 
   @Prop({ default: Role.STUDENT })
