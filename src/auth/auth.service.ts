@@ -17,4 +17,8 @@ export class AuthService {
   async loginUser(loginData: LoginDto): Promise<{ access_token: string }> {
     return this.userService.loginUser(loginData);
   }
+
+  async getProfile(id: string) {
+    return this.userService.getUserById(id);
+  }
 }

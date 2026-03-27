@@ -2,15 +2,20 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtPayload, verify } from 'jsonwebtoken';
+import { AuthRequest } from '../interfaces/authRequest.interface';
+import { UserService } from 'src/user/user.service';
+import { Role } from 'src/user/types/user.types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private readonly userService: UserService) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const request: AuthRequest = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {
@@ -29,10 +34,17 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decode = verify(token, process.env.JWT_SECRET!) as JwtPayload;
-      console.log({ decode });
       if (!decode.sub) {
         throw new UnauthorizedException('Invalid token payload!');
       }
+      const user = await this.userService.getUserById(decode.sub);
+
+      if (!user) {
+        throw new NotFoundException('User not found!');
+      }
+
+      request.user = user.user;
+
       return true;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
