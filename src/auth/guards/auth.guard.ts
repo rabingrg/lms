@@ -4,19 +4,20 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { JwtPayload, verify } from 'jsonwebtoken';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
     if (!authHeader) {
       throw new UnauthorizedException('Missing authorization header');
     }
 
-    const parts: string[] = authHeader.split(' ');
+    const parts = authHeader.split(' ');
     if (parts.length !== 2 || parts[0] !== 'Bearer') {
       throw new UnauthorizedException('Invalid token format!');
     }
