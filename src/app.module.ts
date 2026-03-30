@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { CourseModule } from './course/course.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
     AuthModule,
     UserModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
