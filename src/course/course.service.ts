@@ -2,8 +2,8 @@ import { Course, CourseDocument } from './schemas/course.schema';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { isValidObjectId, Model } from 'mongoose';
 
 @Injectable()
 export class CourseService {
@@ -17,12 +17,23 @@ export class CourseService {
     return { course };
   }
 
-  findAll() {
-    return `This action returns all course`;
+  async findAll(): Promise<{ courses: Course[] | [] }> {
+    const courses = await this.courseModel.find().exec();
+    return {
+      courses: courses ?? [],
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} course`;
+  async findOne(id: string): Promise<{ course: Course } | null> {
+    // if random ids are passed
+    if (!isValidObjectId(id)) {
+      throw new NotFoundException('Course not found!');
+    }
+    const course = await this.courseModel.findOne({ _id: id }).exec();
+    if (!course) {
+      throw new NotFoundException('Course not found!');
+    }
+    return { course };
   }
 
   update(id: number, updateCourseDto: UpdateCourseDto) {
