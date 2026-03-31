@@ -36,8 +36,10 @@ export class CourseService {
     return { course };
   }
 
-  update(id: number, updateCourseDto: UpdateCourseDto) {
-    return `This action updates a #${id} course`;
+  async update(id: string, updateCourseDto: UpdateCourseDto) {
+    return this.courseModel
+      .findByIdAndUpdate(id, updateCourseDto, { returnDocument: 'after' })
+      .exec();
   }
 
   remove(id: number) {
