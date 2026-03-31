@@ -24,7 +24,7 @@ export class CourseService {
     };
   }
 
-  async findOne(id: string): Promise<{ course: Course } | null> {
+  async findOne(id: string): Promise<{ course: Course }> {
     // if random ids are passed
     if (!isValidObjectId(id)) {
       throw new NotFoundException('Course not found!');
@@ -36,13 +36,32 @@ export class CourseService {
     return { course };
   }
 
-  async update(id: string, updateCourseDto: UpdateCourseDto) {
-    return this.courseModel
+  async update(
+    id: string,
+    updateCourseDto: UpdateCourseDto,
+  ): Promise<{ course: Course }> {
+    if (!isValidObjectId(id)) {
+      throw new NotFoundException('Course not found!');
+    }
+    const updated = await this.courseModel
       .findByIdAndUpdate(id, updateCourseDto, { returnDocument: 'after' })
       .exec();
+    if (!updated) {
+      throw new NotFoundException('Course not found!');
+    }
+
+    return { course: updated };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} course`;
+  async remove(id: string): Promise<{ message: string }> {
+    if (!isValidObjectId(id)) {
+      throw new NotFoundException('Course not found!');
+    }
+
+    const deleted = await this.courseModel.findByIdAndDelete(id).exec();
+    if (!deleted) {
+      throw new NotFoundException('Course not found!');
+    }
+    return { message: 'Course deleted successfully!' };
   }
 }
