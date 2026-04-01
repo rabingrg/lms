@@ -96,3 +96,12 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Environment variables
+
+### JWT
+
+- `JWT_SECRET`: secret used to sign/verify access tokens.
+- `JWT_EXPIRES_IN`: access token expiry (passed to `jsonwebtoken` `expiresIn`).
+  - Examples: `15m`, `1h`, `7d`
+  - Default: `15m`

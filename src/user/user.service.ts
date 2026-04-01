@@ -8,10 +8,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schema/user.schema';
-import { IUserRegisterResponse } from './types/user.types';
 import { LoginDto } from 'src/auth/dto/login.dto';
 import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
 import { Model } from 'mongoose';
 
 @Injectable()
@@ -20,27 +18,7 @@ export class UserService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  getToken({
-    sub,
-    email,
-    role,
-  }: {
-    sub: string;
-    email: string;
-    role: string;
-  }): string {
-    const token = sign(
-      {
-        sub,
-        email,
-        role,
-      },
-      process.env.JWT_SECRET as string,
-    );
-    return token;
-  }
-
-  async createUser(registerData: RegisterDto): Promise<IUserRegisterResponse> {
+  async createUser(registerData: RegisterDto): Promise<User> {
     const normalizedEmail = registerData.email.toLowerCase().trim();
 
     const emailExists = await this.userModel.findOne({
@@ -60,20 +38,10 @@ export class UserService {
     };
 
     const createdUser = await this.userModel.create(data);
-
-    const payload = {
-      sub: createdUser._id.toString(),
-      email: createdUser.email,
-      role: createdUser.role,
-    };
-
-    return {
-      data: createdUser,
-      access_token: this.getToken(payload),
-    };
+    return createdUser;
   }
 
-  async loginUser(loginData: LoginDto): Promise<{ access_token: string }> {
+  async loginUser(loginData: LoginDto): Promise<UserDocument> {
     const normalizedEmail = loginData.email.toLowerCase().trim();
 
     const existingUser = await this.userModel
@@ -93,7 +61,6 @@ export class UserService {
       loginData.password,
       existingUser.password,
     );
-
     if (!matchPassword) {
       throw new HttpException(
         'Email or Password wrong!',
@@ -101,15 +68,7 @@ export class UserService {
       );
     }
 
-    const payload = {
-      sub: existingUser._id.toString(),
-      email: existingUser.email,
-      role: existingUser.role,
-    };
-
-    return {
-      access_token: this.getToken(payload),
-    };
+    return existingUser;
   }
 
   async getUserById(id: string): Promise<{ user: User | null }> {

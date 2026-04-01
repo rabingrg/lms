@@ -5,14 +5,16 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtPayload, verify } from 'jsonwebtoken';
 import { AuthRequest } from '../interfaces/authRequest.interface';
 import { UserService } from 'src/user/user.service';
-import { Role } from 'src/user/types/user.types';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: AuthRequest = context.switchToHttp().getRequest();
@@ -33,10 +35,11 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const decode = verify(token, process.env.JWT_SECRET!) as JwtPayload;
-      if (!decode.sub) {
+      const decode = this.jwtService.verify(token);
+      if (!decode?.sub) {
         throw new UnauthorizedException('Invalid token payload!');
       }
+
       const { user } = await this.userService.getUserById(decode.sub);
 
       if (!user) {
@@ -44,18 +47,17 @@ export class AuthGuard implements CanActivate {
       }
 
       request.user = user;
-
       return true;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
 
-      // jwt specific errors
       if (error instanceof Error) {
         if (error.message === 'jwt expired') {
           throw new UnauthorizedException('Token expired');
-        } else if (
+        }
+        if (
           error.message === 'invalid token' ||
           error.message === 'invalid signature'
         ) {

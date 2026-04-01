@@ -4,16 +4,14 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModule } from './user/user.module';
-import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { CourseModule } from './course/course.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URI as string),
     AuthModule,
-    UserModule,
     CourseModule,
   ],
   controllers: [AppController],
